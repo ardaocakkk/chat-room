@@ -1,0 +1,60 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <title>Join to Chat</title>
+</head>
+<body>
+    <div class="centerd-div">
+            <div id="join">
+                <h1 class="text-blue-600 text-center">Join to Room</h1>
+                <input type="text" name="username" placeholder="username" id="username" required>
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full" id="join-btn">Join</button>
+        </div>
+        <div class="chatbox" style="display: none" id="chatbox">
+            <ul class="message-item" id="message-item">
+            </ul>
+            <input type="text" name="message" placeholder="your message" class="message-box" id="message" required>
+        </div>
+    </div>
+    <script>
+        var socket = io({autoConnect: false})
+        document.getElementById("join-btn").addEventListener("click", () => {
+
+            const username = document.getElementById("username").value;
+            socket.connect()
+            console.log(username)
+            socket.on("connect", () => {
+                socket.emit('join', username);
+            })
+
+            document.getElementById("join").style.display = "none";
+            document.getElementById("chatbox").style.display = "block";
+        })
+
+        document.getElementById("message").addEventListener('keyup', (e) => {
+            if (e.key == "Enter") {
+                const message = document.getElementById("message").value;
+                socket.emit("message",message)
+                document.getElementById("message").value = "";
+                console.log(message)
+
+            }
+        })
+
+        socket.on("chat", (data) => {
+
+            let ul = document.getElementById("message-item")
+            let li = document.createElement("li")
+            li.appendChild(document.createTextNode(data["username"] + " : " + data["message"]))
+            ul.appendChild(li)
+        })
+
+
+    </script>
+</body>
+</html>
